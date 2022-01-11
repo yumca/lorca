@@ -1,11 +1,11 @@
 # Lorca
 
-[![Build Status](https://img.shields.io/github/workflow/status/zserge/lorca/CI%20Pipeline)](https://github.com/zserge/lorca)
-[![GoDoc](https://godoc.org/github.com/zserge/lorca?status.svg)](https://godoc.org/github.com/zserge/lorca)
-[![Go Report Card](https://goreportcard.com/badge/github.com/zserge/lorca)](https://goreportcard.com/report/github.com/zserge/lorca)
+[![Build Status](https://img.shields.io/github/workflow/status/yumca/lorca/CI%20Pipeline)](https://github.com/yumca/lorca)
+[![GoDoc](https://godoc.org/github.com/yumca/lorca?status.svg)](https://godoc.org/github.com/yumca/lorca)
+[![Go Report Card](https://goreportcard.com/badge/github.com/yumca/lorca)](https://goreportcard.com/report/github.com/yumca/lorca)
 
 <div>
-<img align="left" src="https://raw.githubusercontent.com/zserge/lorca/master/lorca.png" alt="Lorca" width="128px" height="128px" />
+<img align="left" src="https://raw.githubusercontent.com/yumca/lorca/master/lorca.png" alt="Lorca" width="128px" height="128px" />
 <br/>
 <p>
 	A very small library to build modern HTML5 desktop apps in Go. It uses Chrome
@@ -42,7 +42,7 @@ Also, limitations by design:
 	3rd-party libraries)
 
 If you want to have more control of the browser window - consider using
-[webview](https://github.com/zserge/webview) library with a similar API, so
+[webview](https://github.com/yumca/webview) library with a similar API, so
 migration would be smooth.
 
 ## Example
