@@ -18,6 +18,9 @@ type UI interface {
 	Eval(js string) Value
 	Done() <-chan struct{}
 	Close() error
+	SetEvent(string)
+	PopEvent(string) (int, targetMessage)
+	SetDebugger(bool) error
 }
 
 type ui struct {
@@ -173,4 +176,25 @@ func (u *ui) SetBounds(b Bounds) error {
 
 func (u *ui) Bounds() (Bounds, error) {
 	return u.chrome.bounds()
+}
+
+//Page.frameNavigated 框架导航完成（页面跳转）
+func (u *ui) SetEvent(event string) {
+	u.chrome.setEvent(event)
+}
+
+func (u *ui) PopEvent(eve string) (int, targetMessage) {
+	events := u.chrome.getEvents()
+	if len(events[eve]) > 0 {
+		for k := range events[eve] {
+			e := events[eve][k]
+			delete(events[eve], k)
+			return k, e
+		}
+	}
+	return 0, targetMessage{}
+}
+
+func (u *ui) SetDebugger(enable bool) error {
+	return u.chrome.setDebugger(enable)
 }

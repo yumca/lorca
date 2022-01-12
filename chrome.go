@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"golang.org/x/net/websocket"
 )
@@ -45,6 +46,7 @@ type chrome struct {
 	window   int
 	pending  map[int]chan result
 	bindings map[string]bindingFunc
+	events   map[string]map[int]targetMessage
 }
 
 func newChromeWithArgs(chromeBinary string, args ...string) (*chrome, error) {
@@ -118,6 +120,8 @@ func newChromeWithArgs(chromeBinary string, args ...string) (*chrome, error) {
 		}
 		c.window = win.WindowID
 	}
+	c.events = make(map[string]map[int]targetMessage)
+	c.expiredEvents()
 
 	return c, nil
 }
@@ -306,6 +310,10 @@ func (c *chrome) readLoop() {
 					}()
 				}
 				continue
+			} else if _, ok := c.events[res.Method]; res.ID == 0 && ok {
+				c.events[res.Method][int(time.Now().UnixMicro())] = res
+				//res.Method == "Page.frameNavigated"
+				log.Println(res)
 			}
 
 			c.Lock()
@@ -536,4 +544,40 @@ func contains(arr []string, x string) bool {
 		}
 	}
 	return false
+}
+
+func (c *chrome) expiredEvents() {
+	go func() {
+		for {
+			for k := range c.events {
+				if len(c.events[k]) > 0 {
+					for k2 := range c.events[k] {
+						if (int(time.Now().UnixMicro()) - k2) > 3*1e6 {
+							delete(c.events[k], k2)
+						}
+					}
+				}
+			}
+			time.Sleep(time.Second)
+		}
+	}()
+}
+
+func (c *chrome) getEvents() map[string]map[int]targetMessage {
+	return c.events
+}
+
+func (c *chrome) setEvent(method string) {
+	if c.events[method] == nil {
+		c.events[method] = make(map[int]targetMessage)
+	}
+}
+
+func (c *chrome) setDebugger(enable bool) (err error) {
+	if enable {
+		_, err = c.send("Debugger.enable", h{})
+	} else {
+		_, err = c.send("Debugger.disable", h{})
+	}
+	return
 }
