@@ -21,6 +21,9 @@ type UI interface {
 	SetEvent(string)
 	PopEvent(string) (int, targetMessage)
 	SetDebugger(bool) error
+	SetContent(string, string) error
+	GetFrameTree() (frameTree, error)
+	Reload() error
 }
 
 type ui struct {
@@ -197,4 +200,16 @@ func (u *ui) PopEvent(eve string) (int, targetMessage) {
 
 func (u *ui) SetDebugger(enable bool) error {
 	return u.chrome.setDebugger(enable)
+}
+
+func (u *ui) SetContent(frameid string, html string) error {
+	return u.chrome.setDocumentContent(frameid, html)
+}
+
+func (u *ui) GetFrameTree() (frameTree, error) {
+	return u.chrome.getFrameTree()
+}
+
+func (u *ui) Reload() error {
+	return u.chrome.reload()
 }

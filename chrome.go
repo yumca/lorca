@@ -581,3 +581,73 @@ func (c *chrome) setDebugger(enable bool) (err error) {
 	}
 	return
 }
+
+func (c *chrome) setDocumentContent(frameid string, html string) (err error) {
+	if html != "" {
+		_, err = c.send("Page.setDocumentContent", h{"frameId": frameid, "html": html})
+	}
+	return
+}
+
+type frameTree struct {
+	FrameTree struct {
+		Frame struct {
+			Id                string `json:"id"`
+			Loaderid          string `json:"loaderId"`
+			Url               string `json:"url"`
+			DomainAndRegistry string `json:"domainAndRegistry"`
+			SecurityOrigin    string `json:"securityOrigin"`
+			MimeType          string `json:"mimeType"`
+			AdFrameStatus     struct {
+				AdFrameType string `json:"adFrameType"`
+			} `json:"adFrameStatus"`
+			SecureContextType              string        `json:"secureContextType"`
+			CrossOriginIsolatedContextType string        `json:"crossOriginIsolatedContextType"`
+			GatedAPIFeatures               []interface{} `json:"gatedAPIFeatures"`
+		} `json:"frame"`
+	} `json:"frameTree"`
+}
+
+func (c *chrome) getFrameTree() (frameTree, error) {
+	res, err := c.send("Page.getFrameTree", h{})
+	frameTree := frameTree{}
+	json.Unmarshal(res, &frameTree)
+	return frameTree, err
+}
+
+func (c *chrome) reload() error {
+	_, err := c.send("Page.reload", h{"ignoreCache": true})
+	return err
+}
+
+func (c *chrome) notifications(options map[string]interface{}) {
+	params := h{
+		"notificationId": "", //通知id  空则自动生成  string
+		"options": h{
+			"appIconMaskUrl": "", //应用缩略图 imgdata格式 blob格式
+			"buttons": h{
+				"iconUrl": "", //按钮图像缩略图的URL imgdata格式 blob格式  string
+				"title":   "", //按钮标题   string
+			},
+			"contextMessage": "",                     //更淡更小的字体显示的通知内容 string
+			"eventTime":      time.Now().UnixMilli(), //通知时间毫秒时间戳  number
+			"iconUrl":        "",                     //发送者头像  imgdata格式 blob格式  string
+			"imageUrl":       "",                     //用于图像类型通知的图像缩略图的URL imgdata格式 blob格式  string
+			"isClickable":    false,                  //是否可点击？  boolean
+			// "items":[] //用于多个通知的字段  list
+			"message":  "",   //主要通知内容  string
+			"title":    "通知", //主要通知标题  string
+			"priority": 0,    //优先级  number
+			//优先级范围从-2到2，-2是最低优先级。2是最高的。默认为0
+			//在不支持通知中心的平台（Windows、Linux和Mac）上，-2和-1将导致错误，因为具有这些优先级的通知将根本不显示
+
+			"progress":           0,       //显示进度0-100.   number
+			"requireInteraction": false,   //是否禁止在用户激活或取消之前，通知在屏幕上保持可见  bool
+			"silent":             false,   //是否禁止声音或者震动  默认false  bool
+			"type":               "basic", //要显示的通知类型  "basic" "image" "list" or "progress"  string
+		},
+	}
+	if _, ok := options["notificationid"]; ok {
+		params["notificationId"] = options["notificationid"]
+	}
+}
