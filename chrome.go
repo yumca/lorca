@@ -574,6 +574,7 @@ func (c *chrome) setEvent(method string) {
 }
 
 func (c *chrome) setDebugger(enable bool) (err error) {
+	_, err = c.send("Network.enable", h{})
 	if enable {
 		_, err = c.send("Debugger.enable", h{})
 	} else {
@@ -620,7 +621,8 @@ func (c *chrome) reload() error {
 	return err
 }
 
-func (c *chrome) notifications(options map[string]interface{}) {
+//废弃
+func (c *chrome) notificationsDiscard(options map[string]interface{}) {
 	params := h{
 		"notificationId": "", //通知id  空则自动生成  string
 		"options": h{
