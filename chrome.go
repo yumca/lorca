@@ -311,7 +311,9 @@ func (c *chrome) readLoop() {
 				}
 				continue
 			} else if _, ok := c.events[res.Method]; res.ID == 0 && ok {
+				c.Lock()
 				c.events[res.Method][int(time.Now().UnixMicro())] = res
+				c.Unlock()
 				//res.Method == "Page.frameNavigated"
 				log.Println(res)
 			}
@@ -553,7 +555,9 @@ func (c *chrome) expiredEvents() {
 				if len(c.events[k]) > 0 {
 					for k2 := range c.events[k] {
 						if (int(time.Now().UnixMicro()) - k2) > 3*1e6 {
+							c.Lock()
 							delete(c.events[k], k2)
+							c.Unlock()
 						}
 					}
 				}
@@ -569,7 +573,9 @@ func (c *chrome) getEvents() map[string]map[int]targetMessage {
 
 func (c *chrome) setEvent(method string) {
 	if c.events[method] == nil {
+		c.Lock()
 		c.events[method] = make(map[int]targetMessage)
+		c.Unlock()
 	}
 }
 
